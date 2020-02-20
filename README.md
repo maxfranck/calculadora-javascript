@@ -3,4 +3,4 @@
 Simples calculadora desenvolvida em JavaScript.
 
 ### Projeto
-![Calculadora](/img/calculadora.jpeg)
+![Calculadora](/img/calculadora.png)
