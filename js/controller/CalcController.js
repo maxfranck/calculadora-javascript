@@ -1,55 +1,67 @@
 class CalcController {
 
     constructor() {
-
         //Usamos 'this.' para criar uma variável em uma classe
         //O underline representa uma classe privada
-        this._displayCalc = "0";
+        //Convencionando o uso do 'El' para referir que estamos pegando o elemento do HTML
+        this._locale = 'pt-BR';
+        this._displayCalcEl = document.querySelector("#display");
+        this._dateEl = document.querySelector("#date");
+        this._timeEl = document.querySelector("#time");
         this._currentDate;
         this.initialize();
-
     }
 
     //Funções dentro de uma classe recebe o nome de método
     initialize() {
-
-        //Convencionando o uso do 'El' para referir que estamos pegando o elemento do HTML
-        let displayCalcEl = document.querySelector("#display");
-        let dateEl = document.querySelector("#data");
-        let timeEl = document.querySelector("#hora");
-
-        displayCalcEl.innerHTML = "4567";
-        dateEl.innerHTML = "19/02/2020";
-        timeEl.innerHTML = "23:06";
-
+        this.setDisplayDateTime();
+        //Função executada em um intervalo de tempo milissegundos
+        setInterval(()=>{
+            this.setDisplayDateTime();
+        }, 1000);
     }
 
-    //Por convenção deve-se usar geters e seters para pegar e setar valores de uma classe privada
-    //pega valor em uma classe privada
-    get displayCalc() {
-
-        return this._displayCalc;
-
+    setDisplayDateTime() {
+        //Pegando data e hora no formato definodo no locale
+        this.displayDate = this.currentDate.toLocaleDateString(this._locale,{
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+        this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
     }
 
-    //seta valor em uma classe privada
-    set displayCalc(valor) {
-
-        this._displayCalc = valor;
-
+    //Por convenção deve-se usar geters (get) e seters (set) para pegar e setar valores de uma classe privada
+    get displayTime() {
+        return this._timeEl.innerHTML;
+    }
+    
+    set displayTime(value) {
+        return this._timeEl.innerHTML = value;
+    }
+    
+    get displayDate() {
+        return this._dateEl.innerHTML;
+    }
+    
+    set displayDate(value) {
+        return this._dateEl.innerHTML = value;
     }
 
     get currentDate() {
-
-        return this._currentDate;
-
+        return new Date();
     }
 
-    //seta valor em uma classe privada
-    set currentDate(valor) {
+    set currentDate(value) {
+        return this._currentDate = value;
+    }
 
-        this._currentDate = valor;
+    get displayCalc() {
+        return this._displayCalcEl.innerHTML;
+    }
 
+    set displayCalc(value) {
+        this._displayCalcEl.innerHTML = value;
     }
 
 }
