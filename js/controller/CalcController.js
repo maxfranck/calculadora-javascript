@@ -20,6 +20,37 @@ class CalcController {
     }
 
     //Funções dentro de uma classe recebe o nome de método
+
+
+    copyToClipboard() {
+
+        //Criando um input aqui pois estamos usando SVG. 
+        //Se criar em html não precisa criar o input aqui.
+        let input = document.createElement('input');
+
+        input.value = this.displayCalc;
+
+        document.body.appendChild(input);
+
+        input.select();
+
+        document.execCommand("Copy");
+
+        input.remove();
+
+    }
+
+    pasteFromClipboard() {
+
+        document.addEventListener('paste', e => {
+
+            let text = e.clipboardData.getData('Text');
+
+            this.displayCalc = parseFloat(text);
+
+        });
+    }
+
     //Método de inicialização - Principal
     initialize() {
 
@@ -33,9 +64,11 @@ class CalcController {
         }, 1000);
 
         this.setLastNumberToDisplay();
+        this.pasteFromClipboard();
 
     }
 
+    //Utilizando o teclado numérico
     initKeyboard() {
 
         document.addEventListener('keyup', e => {
@@ -75,7 +108,10 @@ class CalcController {
                 case '9':
                     this.addOperation(parseInt(e.key));
                     break;
-                    
+                case 'c':
+                    if (e.ctrlKey) this.copyToClipboard(); //Add tecla Ctrl+C para copiar valor
+                    break;
+
             }
 
         });
