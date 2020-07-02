@@ -14,6 +14,19 @@ class CalcController {
         this.initButtonsEvents(); // Função de eventos dos botões
     }
 
+    //Atualiza e mostra número no display
+    setLastNumberToDisplay() {
+        let lastNumber;
+        for (let i = this._operation.length-1; i>= 0; i--) {
+            if (!this.isOperator(this._operation[i])) {
+                lastNumber = this._operation[i];
+                break;
+            }
+        }
+        if (!lastNumber) lastNumber = 0;
+        this.displayCalc = lastNumber;
+    }
+
     //Funções dentro de uma classe recebe o nome de método
     //Método de inicialização - Principal
     initialize() {
@@ -22,6 +35,8 @@ class CalcController {
         setInterval(()=> {
             this.setDisplayDateTime();
         }, 1000);
+
+        this.setLastNumberToDisplay();
     }
 
     //Método para separar o evento de click e drag
@@ -33,10 +48,12 @@ class CalcController {
 
     clearAll() {
         this._operation = [];
+        this.setLastNumberToDisplay();
     }
 
     clearEntry() {
         this._operation.pop();
+        this.setLastNumberToDisplay();
     }
 
     getLastOperation() {
@@ -57,25 +74,22 @@ class CalcController {
         }
     }
 
-    //Mostra número no display
-    setLastNumberToDisplay() {
-        let lastNumber;
-        for (let i = this._operation.length-1; i>= 0; i--) {
-            if (!this.isOperator(this._operation[i])) {
-                lastNumber = this._operation[i];
-                break;
-            }
-        }
-        this.displayCalc = lastNumber;
-    }
-
     calc() {
-        //Remove o último número, salvando ele em uma variavel
-        let last = this._operation.pop();
+        let last = '';
+        if (this._operation.length > 3) {
+            last = this._operation.pop();
+        }
         //Mudar de array para string juntando a operação
         let result = eval(this._operation.join(""));
+        //Calcula porcentagem
+        if (last == '%') {
+            result /= 100;
+            this._operation = [result];
+        } else {
         //retornar a operação para array
-        this._operation = [result, last];
+        this._operation = [result];
+        if (last) this._operation.push(last);
+        }
         this.setLastNumberToDisplay();
     }
 
@@ -138,7 +152,7 @@ class CalcController {
                 this.addOperation('%');
                 break;
             case 'igual':
-                
+                this.calc();
                 break;
             case 'ponto':
                 this.addOperation('.');
