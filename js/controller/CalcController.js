@@ -5,6 +5,8 @@ class CalcController {
         //Usamos 'this.' para criar uma variável em uma classe
         //O underline representa uma classe privada
         //Convencionando o uso do 'El' para referir que estamos pegando o elemento do HTML
+        this._audio = new Audio('click.mp3'); //Fala qual audio tocar
+        this._audioOnOff = true; //Padrão se o audio inicia ligado ou desligado
         this._lastOperator = '';
         this._lastNumber = '';
         this._operation = []; //Array para guardar as operações
@@ -66,12 +68,44 @@ class CalcController {
         this.setLastNumberToDisplay();
         this.pasteFromClipboard();
 
+        //Se der duplo click no botão AC o audio liga ou desliga
+        document.querySelectorAll('.btn-ac').forEach(btn => {
+
+            btn.addEventListener('dblclick', e => {
+
+                this.toggleAudio();
+
+            });
+
+        });
+
+    }
+
+    //Liga e desliga audio
+    toggleAudio() {
+
+        this._audioOnOff = !this._audioOnOff;
+
+    }
+
+    //Toca audio
+    playAudio() {
+
+        if (this._audioOnOff) {
+
+            this._audio.currentTime = 0;
+            this._audio.play();
+
+        }
+
     }
 
     //Utilizando o teclado numérico
     initKeyboard() {
 
         document.addEventListener('keyup', e => {
+
+            this.playAudio(); //Colocar ordem de tocar audio ao clicar na tecla
 
             switch(e.key) {
 
@@ -338,6 +372,8 @@ class CalcController {
     }
 
     execBtn(value){
+
+        this.playAudio();
 
         switch(value) {
 
