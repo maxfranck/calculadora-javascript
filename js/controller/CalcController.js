@@ -1,9 +1,12 @@
 class CalcController {
 
     constructor() {
+
         //Usamos 'this.' para criar uma variável em uma classe
         //O underline representa uma classe privada
         //Convencionando o uso do 'El' para referir que estamos pegando o elemento do HTML
+        this._lastOperator = '';
+        this._lastNumber = '';
         this._operation = []; //Array para guardar as operações
         this._locale = 'pt-BR'; // variavel para local
         this._displayCalcEl = document.querySelector('#display'); //Display da calculadora
@@ -12,123 +15,245 @@ class CalcController {
         this._currentDate;
         this.initialize(); // Funçao de inicialização
         this.initButtonsEvents(); // Função de eventos dos botões
-    }
 
-    //Atualiza e mostra número no display
-    setLastNumberToDisplay() {
-        let lastNumber;
-        for (let i = this._operation.length-1; i>= 0; i--) {
-            if (!this.isOperator(this._operation[i])) {
-                lastNumber = this._operation[i];
-                break;
-            }
-        }
-        if (!lastNumber) lastNumber = 0;
-        this.displayCalc = lastNumber;
     }
 
     //Funções dentro de uma classe recebe o nome de método
     //Método de inicialização - Principal
     initialize() {
+
         this.setDisplayDateTime();
+
         //Função executada em um intervalo de tempo em milissegundos
         setInterval(()=> {
+
             this.setDisplayDateTime();
+
         }, 1000);
 
         this.setLastNumberToDisplay();
+
     }
 
     //Método para separar o evento de click e drag
     addEventListenerAll(element, events, fn) {
+
         events.split(' ').forEach(event => {
+
             element.addEventListener(event, fn, false);
+
         });
+
     }
 
     clearAll() {
+
         this._operation = [];
+        this._lastNumber = '';
+        this._lastOperator = '';
+
         this.setLastNumberToDisplay();
+
     }
 
     clearEntry() {
+
         this._operation.pop();
+        
         this.setLastNumberToDisplay();
+
     }
 
     getLastOperation() {
+
         return this._operation[this._operation.length-1];
+
     }
 
     setLastOperation(value) {
+
         this._operation[this._operation.length-1] = value;
+
     }
 
     //Verifica se é um operador ou não
     isOperator(value) {
+
         //indexOf procura um valor dentro do array
         if (['+', '-', '*', '/', '%'].indexOf(value) > -1) {
+
             return true;
+
         } else {
+
             return false;
+
         }
+
+    }
+
+    //Mudar de array para string juntando a operação
+    getResult() {
+
+        return eval(this._operation.join(""));
+
     }
 
     calc() {
+
         let last = '';
-        if (this._operation.length > 3) {
-            last = this._operation.pop();
+
+        this._lastOperator = this.getLastItem();
+
+        if (this._operation.length < 3) {
+
+            let firstItem = this._operation[0];
+            this._operation = [firstItem, this._lastOperator, this._lastNumber];
+
         }
-        //Mudar de array para string juntando a operação
-        let result = eval(this._operation.join(""));
+
+        if (this._operation.length > 3) {
+
+            last = this._operation.pop();
+            this._lastNumber = this.getResult();
+
+        } else if (this._operation.length == 3) {
+
+            this._lastNumber = this.getLastItem(false);
+
+        }
+
+        let result = this.getResult();
+
         //Calcula porcentagem
         if (last == '%') {
+
             result /= 100;
             this._operation = [result];
+
         } else {
+
         //retornar a operação para array
         this._operation = [result];
         if (last) this._operation.push(last);
+
         }
+
         this.setLastNumberToDisplay();
+
     }
 
     pushOperation(value) {
+
         this._operation.push(value);
+
         if (this._operation.length > 3) {
+
             this.calc();
+
         }
+
+    }
+
+    getLastItem(isOperator = true) {
+
+        let lastItem;
+
+        for (let i = this._operation.length-1; i>= 0; i--) {
+
+            if (this.isOperator(this._operation[i]) == isOperator) {
+
+                lastItem = this._operation[i];
+                break;
+
+            }
+
+        }
+
+        if (!lastItem) {
+
+            lastItem = (isOperator) ? this._lastOperator : this._lastNumber;
+
+        }
+
+        return lastItem;
+
+    }
+
+    //Atualiza e mostra número no display
+    setLastNumberToDisplay() {
+
+        let lastNumber = this.getLastItem(false);
+
+        if (!lastNumber) lastNumber = 0;
+
+        this.displayCalc = lastNumber;
+
     }
     
     //Adicionando nova operação
     addOperation(value) {
+
         console.log('A', this.getLastOperation());
+
         if (isNaN(this.getLastOperation())) {
+
             //Troca o operador caso já tenha clicado em um anteriormente
             if (this.isOperator(value)) {
+
                 this.setLastOperation(value);
-            } else if (isNaN(value)) {
-                console.log('Outra coisa', value);
+
             } else {
+
                 this.pushOperation(value);
                 this.setLastNumberToDisplay();
+
             }
+
         } else {
+
             if (this.isOperator(value)) {
+
                 this.pushOperation(value);
+
             } else {
+
                 let newValue = this.getLastOperation().toString() + value.toString();
-                this.setLastOperation(parseInt(newValue));
+                this.setLastOperation(parseFloat(newValue));
                 this.setLastNumberToDisplay();
+
             }
+
         }
+
     }
 
     setError() {
+
         this.displayCalc = "Error";
+
+    }
+
+    addDot() {
+
+        let lastOperation = this.getLastOperation();
+
+        if (this.isOperator(lastOperation) || !lastOperation) {
+
+            this.pushOperation('0.')
+
+        } else {
+
+            this.setLastOperation(lastOperation.toString() + '.');
+
+        }
+
+        this.setLastNumberToDisplay();
+
     }
 
     execBtn(value){
+
         switch(value){
             case'ac':
                 this.clearAll();
@@ -155,7 +280,7 @@ class CalcController {
                 this.calc();
                 break;
             case 'ponto':
-                this.addOperation('.');
+                this.addDot();
                 break;
             case '0': 
             case '1':
@@ -173,67 +298,99 @@ class CalcController {
                 this.setError();
                 break;
         }
+
     }
 
     // Função de Inicialização dos Botões - lê do HTML os dados da calculadora 
     initButtonsEvents() {
+
         //pega todas as tags g que são filhas de buttons e parts
         let buttons = document.querySelectorAll('#buttons > g, #parts > g');
+
         //Foreach para percorrer todos os botões
         buttons.forEach((btn, index)=> {
+
             //Evento mouse click e drag
             this.addEventListenerAll(btn, 'click drag', e=> {
+
                 let textBtn = btn.className.baseVal.replace("btn-", "");
+
                 this.execBtn(textBtn);
+
             });
             //Adiciona mão ao passar o mouse sobre os botões
             this.addEventListenerAll(btn, 'mouseover mouseup mousedown', e=> {
+
                 btn.style.cursor = "pointer";
+
             });
+
         });
+
     }
 
     setDisplayDateTime() {
+
         //Pegando data e hora no formato definodo no locale
         this.displayDate = this.currentDate.toLocaleDateString(this._locale,{
+
             day: '2-digit',
             month: 'short',
             year: 'numeric'
+
         });
+
         this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
+
     }
 
     //Por convenção deve-se usar geters (get) e seters (set) para pegar e setar valores de uma classe privada
     get displayTime() {
+
         return this._timeEl.innerHTML;
+
     }
     
     set displayTime(value) {
+
         return this._timeEl.innerHTML = value;
+
     }
     
     get displayDate() {
+
         return this._dateEl.innerHTML;
+
     }
     
     set displayDate(value) {
+
         return this._dateEl.innerHTML = value;
+
     }
 
     get currentDate() {
+
         return new Date();
+
     }
 
     set currentDate(value) {
+
         return this._currentDate = value;
+
     }
 
     get displayCalc() {
+
         return this._displayCalcEl.innerHTML;
+
     }
 
     set displayCalc(value) {
+
         this._displayCalcEl.innerHTML = value;
+
     }
 
 }
